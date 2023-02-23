@@ -15,9 +15,12 @@ public class ObjectSpawner : MonoBehaviour
 
     private static List<ARRaycastHit> s_Hits = new List<ARRaycastHit>();
 
+    private bool isObjectLocked = false;
+
     private void Awake()
     {
-        raycastManager = GetComponent<ARRaycastManager>();  
+        raycastManager = GetComponent<ARRaycastManager>();
+        GetComponent<LockObjectPosition>().OnObjectLockedStateChanged += ToggleObjectLockState; //subscribing to the event
     }
 
 
@@ -34,7 +37,7 @@ public class ObjectSpawner : MonoBehaviour
         {
             return;
         }
-        if(raycastManager.Raycast(touchPosition, s_Hits, TrackableType.PlaneWithinPolygon))
+        if(raycastManager.Raycast(touchPosition, s_Hits, TrackableType.PlaneWithinPolygon) && !isObjectLocked)
         {
             var hitPose = s_Hits[0].pose;
             if(spawnedObject == null)
@@ -58,5 +61,10 @@ public class ObjectSpawner : MonoBehaviour
         }
         touchPosition = default;
         return false;   
+    }
+
+    private void ToggleObjectLockState(bool lockState)
+    {
+        isObjectLocked = lockState;
     }
 }
